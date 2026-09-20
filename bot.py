@@ -5,6 +5,7 @@ from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from config import TOKEN
 from telegram.ext import CommandHandler
+from api import get_rate
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,10 +28,35 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/game - игра.\n"
         )
 
+async def course(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if len(args) != 2:
+        await update.message.reply_text(
+            "Использование /course USD 100\n"
+            "Где USD - код валюты, 100 - количество."
+        )
+        return
+    code = args[0].upper()
+    amount_str = args[1]
+
+    if not amount_str.replace(".", "").isdigit():
+        await update.message.reply_text("Ошибка! Количетсво должно быть числом.")
+        return
+    amount = float(amount_str)
+    rate = get_rate(code)
+
+    if rate is None:
+        await update.message.reply_text(f"Валюта '{code}' не найдена.")
+        return
+
+    result = amount * rate
+    await update.message.reply_text(f"{amount} {code} = {round(result, 2)} RUB")
+
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("course", course))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     app.run_polling()
 
