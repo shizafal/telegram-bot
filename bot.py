@@ -6,6 +6,7 @@ from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from config import TOKEN
 from telegram.ext import CommandHandler
 from api import get_rate
+from notes import handle_note
 
 logging.basicConfig(level=logging.INFO)
 
@@ -52,20 +53,12 @@ async def course(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = amount * rate
     await update.message.reply_text(f"{amount} {code} = {round(result, 2)} RUB")
 
-async def note(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Использование:\n"
-        "/note add <текст> - добавить заметку\n"
-        "/note list - показать все заметки\n"
-        "/note delete <номер> - удалить заметку"
-        )
-
 def main():
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("course", course))
-    app.add_handler(CommandHandler("note", note))
+    app.add_handler(CommandHandler("note", handle_note))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     app.run_polling()
 
