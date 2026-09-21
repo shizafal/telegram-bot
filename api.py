@@ -20,6 +20,3 @@ def get_rate(code):
     except (KeyError, ValueError) as e:
         print(f"Ошибка в данных API: {e}")
         return None
-
-if __name__ == "__main__":
-    print("Это модуль курс валют.")

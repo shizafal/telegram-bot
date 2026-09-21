@@ -1,4 +1,4 @@
-# Эхо бот
+"""Мульти бот Telegram"""
 
 import logging
 from telegram import Update
@@ -7,11 +7,14 @@ from config import TOKEN
 from telegram.ext import CommandHandler
 from api import get_rate
 from notes import handle_note
+from game_bot import game_start, game_guess
 
 logging.basicConfig(level=logging.INFO)
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"Эхо: {update.message.text}")
+async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Неизвестная команда. Напиши /help, чтобы увидеть список."
+    )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -59,7 +62,9 @@ def main():
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("course", course))
     app.add_handler(CommandHandler("note", handle_note))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    app.add_handler(CommandHandler("game", game_start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, game_guess))
+    app.add_handler(MessageHandler(filters.COMMAND, unknown))
     app.run_polling()
 
 if __name__ == "__main__":
